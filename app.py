@@ -17,7 +17,9 @@ bedrooms = st.slider("Bedrooms", 0, 10, 1)
 bathrooms = st.slider("Bathrooms", 0, 5, 1)
 tenure = st.slider("Host Tenure (Years)", 0, 20, 1)
 num_amenities = st.slider("Number of Amenities", 0, 50, 10)
-
+accommodates = st.slider("Accommodates", 1, 16, 4)
+longitude = st.number_input("Longitude", value=-87.6298)  # example: Chicago
+latitude = st.number_input("Latitude", value=41.8781)
 
 input_dict = {
     'bedrooms': bedrooms,
