@@ -26,7 +26,11 @@ input_dict = {
     'num_bathrooms': bathrooms,
     'tenure': tenure,
     'num_amenities': num_amenities,
-    'city_encoded': 0  
+    'city_encoded': 0,
+    'accommodates': accommodates,
+    'longitude': longitude,
+    'latitude': latitude
+    # add any other important features here
 }
 X_input = pd.DataFrame([input_dict])
 
