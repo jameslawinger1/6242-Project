@@ -10,9 +10,14 @@ with(open('rf_model.pkl', 'rb')) as f:
 with (open('feature_columns.pkl', 'rb')) as f: 
     feature_cols = pickle.load(f)
 
+with open('city_encoder.pkl', 'rb') as f:
+    city_encoder = pickle.load(f)
+
+
 st.title("Airbnb Price Estimator")
 
-city = st.selectbox("City", ["austin", "hawaii", "new-orleans", "chicago"])
+all_cities = list(city_encoder.classes_)
+city = st.selectbox("City", all_cities)
 bedrooms = st.slider("Bedrooms", 0, 10, 1)
 bathrooms = st.slider("Bathrooms", 0, 5, 1)
 tenure = st.slider("Host Tenure (Years)", 0, 20, 1)
@@ -26,7 +31,7 @@ input_dict = {
     'num_bathrooms': bathrooms,
     'tenure': tenure,
     'num_amenities': num_amenities,
-    'city_encoded': 0,
+    'city_encoded': int(city_encoder.transform([city])[0]),
     'accommodates': accommodates,
     'longitude': longitude,
     'latitude': latitude
