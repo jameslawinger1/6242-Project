@@ -7,7 +7,7 @@ import pickle
 with(open('rf_model.pkl', 'rb')) as f: 
     model = pickle.load(f)
 
-with (open('feature_cols.pkl', 'rb')) as f: 
+with (open('feature_columns.pkl', 'rb')) as f: 
     feature_cols = pickle.load(f)
 
 st.title("Airbnb Price Estimator")
