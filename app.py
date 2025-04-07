@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import datetime
+import pydeck as pdk
 
 
 with(open('rf_model.pkl', 'rb')) as f: 
@@ -23,14 +24,32 @@ st.title("Airbnb Price Estimator")
 city = st.selectbox("Select City", sorted(city_coords.keys()))
 lat_default = city_coords[city]['latitude']
 lon_default = city_coords[city]['longitude']
-#get coordinates from city
-latitude = st.number_input("Latitude", value=lat_default, format="%.6f")
-longitude = st.number_input("Longitude", value=lon_default, format="%.6f")
-#map it
-st.map(pd.DataFrame([{
-    'lat': latitude,
-    'lon': longitude
-}]))
+
+lat = city_coords[city]['latitude']
+lon = city_coords[city]['longitude']
+
+# Create pydeck layer
+layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=[{"lat": lat, "lon": lon}],
+    get_position='[lon, lat]',
+    get_color='[200, 30, 0, 160]',
+    get_radius=5000,
+)
+
+# Create zoomed-out map view
+view_state = pdk.ViewState(
+    latitude=lat,
+    longitude=lon,
+    zoom=6,           # ← adjust zoom here (4–12 is typical)
+    pitch=0,
+)
+
+st.pydeck_chart(pdk.Deck(
+    map_style="mapbox://styles/mapbox/light-v9",
+    initial_view_state=view_state,
+    layers=[layer],
+))
 
 bedrooms = st.slider("Bedrooms", 0, 10, 1)
 bathrooms = st.slider("Bathrooms", 0, 5, 1)
