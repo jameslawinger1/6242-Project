@@ -87,4 +87,3 @@ X_input = X_input[feature_cols]
 if st.button("Estimate Price"):
     predicted_price = model.predict(X_input)[0]
     st.success(f"Estimated Airbnb Price: ${predicted_price:.2f}")
-    st.caption(f"Based on location: **{city}** at ({latitude:.4f}, {longitude:.4f})")
