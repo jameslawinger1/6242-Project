@@ -170,7 +170,7 @@ if st.button("Show Feature Importance"):
             )
             .properties(
                 width=600,
-                height=alt.Step(30) * len(top_10_df),
+                height=30 * len(top_10_df),
                 title="Top 10 Feature Importance"
             )
             .add_selection(selection_feat)
