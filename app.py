@@ -21,59 +21,41 @@ with open('city_coords.pkl', 'rb') as f:
 
 st.title("Airbnb Price Estimator")
 
-#City selection and coordinates
-city = st.selectbox("Select City", sorted(city_coords.keys()))
-lat_default = city_coords[city]['latitude']
-lon_default = city_coords[city]['longitude']
+with st.form("estimator_form"):
+    city = st.selectbox("Select City", sorted(city_coords.keys()))
+    lat = city_coords[city]['latitude']
+    lon = city_coords[city]['longitude']
 
-lat = city_coords[city]['latitude']
-lon = city_coords[city]['longitude']
+    col1, col2 = st.columns(2)
+    with col1:
+        bedrooms = st.slider("Bedrooms", 0, 10, 1)
+        tenure = st.slider("Host Tenure (Years)", 0, 20, 1)
+        accommodates = st.slider("Accommodates", 1, 16, 4)
+    with col2:
+        bathrooms = st.slider("Bathrooms", 0, 5, 1)
+        stay_date = st.date_input("Stay Date", datetime.date.today())
+        days_since = (datetime.date.today() - stay_date).days
 
-# Create pydeck layer
-layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=[{"lat": lat, "lon": lon}],
-    get_position='[lon, lat]',
-    get_color='[200, 30, 0, 160]',
-    get_radius=5000,
-)
+    with st.expander("Advanced Listing Settings"):
+        host_listings = st.slider("Host's Total Listings", 0, 100, 6)
+        reviews_per_month = st.slider("Reviews Per Month", 0.0, 10.0, 1.0, step=0.1)
+        minimum_nights = st.slider("Avg Minimum Nights", 1, 60, 3)
 
-# Create zoomed-out map view
-view_state = pdk.ViewState(
-    latitude=lat,
-    longitude=lon,
-    zoom=6,           # ← adjust zoom here (4–12 is typical)
-    pitch=0,
-)
+    st.markdown("---")
+    st.subheader("Select Variables to Use")
+    col3, col4 = st.columns(2)
+    with col3:
+        use_bedrooms = st.checkbox("Bedrooms", value=True)
+        use_bathrooms = st.checkbox("Bathrooms", value=True)
+        use_tenure = st.checkbox("Host Tenure", value=True)
+        use_accommodates = st.checkbox("Accommodates", value=True)
+    with col4:
+        use_date = st.checkbox("Date of Stay", value=True)
+        use_listings = st.checkbox("Host's Total Listings", value=True)
+        use_reviews = st.checkbox("Reviews Per Month", value=True)
+        use_min_nights = st.checkbox("Avg Minimum Nights", value=True)
 
-st.pydeck_chart(pdk.Deck(
-    map_style="mapbox://styles/mapbox/light-v9",
-    initial_view_state=view_state,
-    layers=[layer],
-))
-
-bedrooms = st.slider("Bedrooms", 0, 10, 1)
-bathrooms = st.slider("Bathrooms", 0, 5, 1)
-tenure = st.slider("Host Tenure (Years)", 0, 20, 1)
-accommodates = st.slider("Accommodates", 1, 16, 4)
-
-stay_date = st.date_input("Stay Date", datetime.date.today())
-days_since = (datetime.date.today() - stay_date).days
-
-with st.expander("Advanced Listing Settings"):
-    host_listings = st.slider("Host's Total Listings", 0, 100, value=6)
-    reviews_per_month = st.slider("Reviews Per Month", 0.0, 10.0, value=1.0, step=0.1)
-    minimum_nights = st.slider("Avg Minimum Nights", 1, 60, value=3)
-
-st.subheader("Select Variables to Use")
-use_bedrooms = st.checkbox("Bedrooms", value=True)
-use_bathrooms = st.checkbox("Bathrooms", value=True)
-use_tenure = st.checkbox("Host Tenure", value=True)
-use_accommodates = st.checkbox("Accommodates", value=True)
-use_date = st.checkbox("Date of Stay", value=True)
-use_listings = st.checkbox("Host's Total Listings", value=True)
-use_reviews = st.checkbox("Reviews Per Month", value=True)
-use_min_nights = st.checkbox("Avg Minimum Nights", value=True)
+    submitted = st.form_submit_button("Estimate Price")
 
 input_dict = {}
 if use_bedrooms:
@@ -96,42 +78,53 @@ input_dict['latitude'] = lat
 input_dict['longitude'] = lon
 
 X_input = pd.DataFrame([input_dict])
-
 for col in feature_cols:
     if col not in X_input.columns:
         X_input[col] = 0
 X_input = X_input[feature_cols]
 
+layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=[{"lat": lat, "lon": lon}],
+    get_position='[lon, lat]',
+    get_color='[200, 30, 0, 160]',
+    get_radius=5000,
+)
+view_state = pdk.ViewState(
+    latitude=lat,
+    longitude=lon,
+    zoom=6,
+    pitch=0,
+)
+st.pydeck_chart(pdk.Deck(
+    map_style="mapbox://styles/mapbox/light-v9",
+    initial_view_state=view_state,
+    layers=[layer],
+))
 
-if st.button("Estimate Price"):
+if submitted:
     predicted_price = model.predict(X_input)[0]
     st.success(f"Estimated Airbnb Price: ${predicted_price:.2f}")
 
 if st.button("Compare Prices Across Cities"):
     city_predictions = []
-    
     for city_name in city_coords:
         lat_city = city_coords[city_name]['latitude']
         lon_city = city_coords[city_name]['longitude']
-        
         city_input = input_dict.copy()
         city_input['latitude'] = lat_city
         city_input['longitude'] = lon_city
-
         city_df = pd.DataFrame([city_input])
         for col in feature_cols:
             if col not in city_df.columns:
                 city_df[col] = 0
         city_df = city_df[feature_cols]
-        
         price = model.predict(city_df)[0]
         city_predictions.append((city_name, price))
 
-    city_predictions.sort(key=lambda x: x[1], reverse=True) 
-
-    st.subheader("Predicted Prices with Seelected Features Across Cities")
+    city_predictions.sort(key=lambda x: x[1], reverse=True)
+    st.subheader("Predicted Prices Across Cities")
     pred_df = pd.DataFrame(city_predictions, columns=["City", "Predicted Price"])
-
     pred_df["Predicted Price"] = pred_df["Predicted Price"].round(2)
 
     chart = alt.Chart(pred_df).mark_bar(color='#f53f2c').encode(
@@ -146,7 +139,6 @@ if st.button("Compare Prices Across Cities"):
         height=400,
         title="Predicted Prices with Selected Features Across Cities"
     )
-
     st.altair_chart(chart, use_container_width=True)
 
 if st.button("Show Feature Importance"):
