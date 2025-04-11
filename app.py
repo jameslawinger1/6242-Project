@@ -116,3 +116,29 @@ if st.button("Show Feature Importance"):
         ax.set_xlabel("Relative Importance")
         ax.set_title("Feature Importance")
         st.pyplot(fig)
+
+if st.button("Compare Prices Across Cities"):
+    city_predictions = []
+    
+    for city_name in city_coords:
+        lat_city = city_coords[city_name]['latitude']
+        lon_city = city_coords[city_name]['longitude']
+        
+        city_input = input_dict.copy()
+        city_input['latitude'] = lat_city
+        city_input['longitude'] = lon_city
+
+        city_df = pd.DataFrame([city_input])
+        for col in feature_cols:
+            if col not in city_df.columns:
+                city_df[col] = 0
+        city_df = city_df[feature_cols]
+        
+        price = model.predict(city_df)[0]
+        city_predictions.append((city_name, price))
+
+    city_predictions.sort(key=lambda x: x[1], reverse=True) 
+
+    st.subheader("Predicted Prices with Seelected Features Across Cities")
+    pred_df = pd.DataFrame(city_predictions, columns=["City", "Predicted Price"])
+    st.bar_chart(pred_df.set_index("City"))
