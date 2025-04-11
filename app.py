@@ -27,11 +27,13 @@ with st.form("estimator_form"):
     lat = city_coords[city]['latitude']
     lon = city_coords[city]['longitude']
 
-    st.markdown("### Basic Listing Info")
+    st.markdown("### Basic Listing Information")
     col1, col2 = st.columns(2)
     with col1:
         accommodates = st.slider("Accommodates", 1, 16, 4)
         bedrooms = st.slider("Bedrooms", 0, 10, 1)
+        stay_date = st.date_input("Stay Date", datetime.date.today())
+        days_since = (datetime.date.today() - stay_date).days
     with col2:
         bathrooms = st.slider("Bathrooms", 0, 5, 1)
 
@@ -46,8 +48,6 @@ with st.form("estimator_form"):
     with st.expander("Show Advanced Settings"):
         reviews_per_month = st.slider("Reviews Per Month", 0.0, 10.0, 1.0, step=0.1)
         minimum_nights = st.slider("Avg Minimum Nights", 1, 60, 3)
-        stay_date = st.date_input("Stay Date", datetime.date.today())
-        days_since = (datetime.date.today() - stay_date).days
 
     st.markdown("---")
     st.subheader("Select Variables to Include in Model")
@@ -56,12 +56,12 @@ with st.form("estimator_form"):
         use_accommodates = st.checkbox("Accommodates", value=True)
         use_bedrooms = st.checkbox("Bedrooms", value=True)
         use_bathrooms = st.checkbox("Bathrooms", value=True)
+        use_date = st.checkbox("Date of Stay", value=False)
     with col6:
         use_tenure = st.checkbox("Host Tenure", value=True)
         use_listings = st.checkbox("Host's Total Listings", value=True)
         use_reviews = st.checkbox("Reviews Per Month", value=False)
         use_min_nights = st.checkbox("Avg Minimum Nights", value=False)
-        use_date = st.checkbox("Date of Stay", value=False)
 
     submitted = st.form_submit_button("Estimate Price")
 
