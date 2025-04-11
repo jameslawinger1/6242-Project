@@ -32,10 +32,10 @@ with st.form("estimator_form"):
     with col1:
         accommodates = st.slider("Accommodates", 1, 16, 4)
         bedrooms = st.slider("Bedrooms", 0, 10, 1)
-        stay_date = st.date_input("Stay Date", datetime.date.today())
-        days_since = (datetime.date.today() - stay_date).days
     with col2:
         bathrooms = st.slider("Bathrooms", 0, 5, 1)
+        stay_date = st.date_input("Stay Date", datetime.date.today())
+        days_since = (datetime.date.today() - stay_date).days
 
     st.markdown("### Host Information")
     col3, col4 = st.columns(2)
