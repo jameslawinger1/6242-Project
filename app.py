@@ -107,17 +107,6 @@ if st.button("Estimate Price"):
     predicted_price = model.predict(X_input)[0]
     st.success(f"Estimated Airbnb Price: ${predicted_price:.2f}")
 
-if st.button("Show Feature Importance"):
-    if hasattr(model, "feature_importances_"):
-        feature_importances = model.feature_importances_
-        importance_df = pd.DataFrame({'Feature': feature_cols, 'Importance': feature_importances})
-        importance_df = importance_df.sort_values(by='Importance', ascending=True)
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.barh(importance_df['Feature'], importance_df['Importance'], color='#f53f2c', align='center')
-        ax.set_xlabel("Relative Importance")
-        ax.set_title("Feature Importance")
-        st.pyplot(fig)
-
 if st.button("Compare Prices Across Cities"):
     city_predictions = []
     
@@ -159,3 +148,15 @@ if st.button("Compare Prices Across Cities"):
     )
 
     st.altair_chart(chart, use_container_width=True)
+
+if st.button("Show Feature Importance"):
+    if hasattr(model, "feature_importances_"):
+        feature_importances = model.feature_importances_
+        importance_df = pd.DataFrame({'Feature': feature_cols, 'Importance': feature_importances})
+        importance_df = importance_df.sort_values(by='Importance', ascending=True)
+        fig, ax = plt.subplots(figsize=(8, 6))
+        ax.barh(importance_df['Feature'], importance_df['Importance'], color='#f53f2c', align='center')
+        ax.set_xlabel("Relative Importance")
+        ax.set_title("Feature Importance")
+        st.pyplot(fig)
+
