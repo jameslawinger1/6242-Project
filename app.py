@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 import datetime
 import pydeck as pdk
-
+import matplotlib.pyplot as plt
 
 with(open('rf_model.pkl', 'rb')) as f: 
     model = pickle.load(f)
@@ -64,18 +64,36 @@ with st.expander("Advanced Listing Settings"):
     reviews_per_month = st.slider("Reviews Per Month", 0.0, 10.0, value=1.0, step=0.1)
     minimum_nights = st.slider("Avg Minimum Nights", 1, 60, value=3)
 
-input_dict = {
-    'bedrooms': bedrooms,
-    'num_bathrooms': bathrooms,
-    'tenure': tenure,
-    'accommodates': accommodates,
-    'latitude': lat,
-    'longitude': lon,
-    'date': days_since,
-    'host_total_listings_count': host_listings,
-    'reviews_per_month': reviews_per_month,
-    'minimum_nights_avg_ntm': minimum_nights
-}
+st.subheader("Select Variables to Use")
+use_bedrooms = st.checkbox("Bedrooms", value=True)
+use_bathrooms = st.checkbox("Bathrooms", value=True)
+use_tenure = st.checkbox("Host Tenure", value=True)
+use_accommodates = st.checkbox("Accommodates", value=True)
+use_date = st.checkbox("Date of Stay", value=True)
+use_listings = st.checkbox("Host's Total Listings", value=True)
+use_reviews = st.checkbox("Reviews Per Month", value=True)
+use_min_nights = st.checkbox("Avg Minimum Nights", value=True)
+
+input_dict = {}
+if use_bedrooms:
+    input_dict['bedrooms'] = bedrooms
+if use_bathrooms:
+    input_dict['num_bathrooms'] = bathrooms
+if use_tenure:
+    input_dict['tenure'] = tenure
+if use_accommodates:
+    input_dict['accommodates'] = accommodates
+if use_date:
+    input_dict['date'] = days_since
+if use_listings:
+    input_dict['host_total_listings_count'] = host_listings
+if use_reviews:
+    input_dict['reviews_per_month'] = reviews_per_month
+if use_min_nights:
+    input_dict['minimum_nights_avg_ntm'] = minimum_nights
+input_dict['latitude'] = lat
+input_dict['longitude'] = lon
+
 X_input = pd.DataFrame([input_dict])
 
 for col in feature_cols:
@@ -87,3 +105,14 @@ X_input = X_input[feature_cols]
 if st.button("Estimate Price"):
     predicted_price = model.predict(X_input)[0]
     st.success(f"Estimated Airbnb Price: ${predicted_price:.2f}")
+
+if st.button("Show Feature Importance"):
+    if hasattr(model, "feature_importances_"):
+        feature_importances = model.feature_importances_
+        importance_df = pd.DataFrame({'Feature': feature_cols, 'Importance': feature_importances})
+        importance_df = importance_df.sort_values(by='Importance', ascending=True)
+        fig, ax = plt.subplots(figsize=(8, 6))
+        ax.barh(importance_df['Feature'], importance_df['Importance'], color='skyblue', align='center')
+        ax.set_xlabel("Relative Importance")
+        ax.set_title("Feature Importance from RF Model")
+        st.pyplot(fig)
