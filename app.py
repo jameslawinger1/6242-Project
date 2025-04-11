@@ -152,11 +152,19 @@ if st.button("Compare Prices Across Cities"):
 if st.button("Show Feature Importance"):
     if hasattr(model, "feature_importances_"):
         feature_importances = model.feature_importances_
-        importance_df = pd.DataFrame({'Feature': feature_cols, 'Importance': feature_importances})
-        importance_df = importance_df.sort_values(by='Importance', ascending=True)
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.barh(importance_df['Feature'], importance_df['Importance'], color='#f53f2c', align='center')
-        ax.set_xlabel("Relative Importance")
-        ax.set_title("Feature Importance")
-        st.pyplot(fig)
+        importance_df = pd.DataFrame({
+            'Feature': feature_cols,
+            'Importance': feature_importances
+        }).sort_values(by='Importance', ascending=False)
 
+        chart = alt.Chart(importance_df).mark_bar(color='#FF5733').encode(
+            x=alt.X("Importance:Q", title="Relative Importance"),
+            y=alt.Y("Feature:N", sort='-x'),
+            tooltip=[alt.Tooltip("Feature:N"), alt.Tooltip("Importance:Q", format=".4f")]
+        ).properties(
+            width=600,
+            height=600,
+            title="Feature Importance"
+        )
+
+        st.altair_chart(chart, use_container_width=True)
