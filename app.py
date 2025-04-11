@@ -22,49 +22,40 @@ with open('city_coords.pkl', 'rb') as f:
 st.title("Airbnb Price Estimator")
 
 with st.form("estimator_form"):
-    st.markdown("### Location")
     city = st.selectbox("Select City", sorted(city_coords.keys()))
     lat = city_coords[city]['latitude']
     lon = city_coords[city]['longitude']
 
-    st.markdown("### Basic Listing Info")
     col1, col2 = st.columns(2)
     with col1:
-        accommodates = st.slider("Accommodates", 1, 16, 4)
         bedrooms = st.slider("Bedrooms", 0, 10, 1)
+        tenure = st.slider("Host Tenure (Years)", 0, 20, 1)
+        accommodates = st.slider("Accommodates", 1, 16, 4)
     with col2:
         bathrooms = st.slider("Bathrooms", 0, 5, 1)
-
-    st.markdown("### Host Information")
-    col3, col4 = st.columns(2)
-    with col3:
-        tenure = st.slider("Host Tenure (Years)", 0, 20, 1)
-    with col4:
-        host_listings = st.slider("Host's Total Listings", 0, 100, 6)
-
-    st.markdown("### Advanced Settings")
-    with st.expander("Show Advanced Settings"):
-        reviews_per_month = st.slider("Reviews Per Month", 0.0, 10.0, 1.0, step=0.1)
-        minimum_nights = st.slider("Avg Minimum Nights", 1, 60, 3)
         stay_date = st.date_input("Stay Date", datetime.date.today())
         days_since = (datetime.date.today() - stay_date).days
 
+    with st.expander("Advanced Listing Settings"):
+        host_listings = st.slider("Host's Total Listings", 0, 100, 6)
+        reviews_per_month = st.slider("Reviews Per Month", 0.0, 10.0, 1.0, step=0.1)
+        minimum_nights = st.slider("Avg Minimum Nights", 1, 60, 3)
+
     st.markdown("---")
-    st.subheader("Select Variables to Include in Model")
-    col5, col6 = st.columns(2)
-    with col5:
-        use_accommodates = st.checkbox("Accommodates", value=True)
+    st.subheader("Select Variables to Use")
+    col3, col4 = st.columns(2)
+    with col3:
         use_bedrooms = st.checkbox("Bedrooms", value=True)
         use_bathrooms = st.checkbox("Bathrooms", value=True)
-    with col6:
         use_tenure = st.checkbox("Host Tenure", value=True)
+        use_accommodates = st.checkbox("Accommodates", value=True)
+    with col4:
+        use_date = st.checkbox("Date of Stay", value=True)
         use_listings = st.checkbox("Host's Total Listings", value=True)
-        use_reviews = st.checkbox("Reviews Per Month", value=False)
-        use_min_nights = st.checkbox("Avg Minimum Nights", value=False)
-        use_date = st.checkbox("Date of Stay", value=False)
+        use_reviews = st.checkbox("Reviews Per Month", value=True)
+        use_min_nights = st.checkbox("Avg Minimum Nights", value=True)
 
     submitted = st.form_submit_button("Estimate Price")
-
 
 input_dict = {}
 if use_bedrooms:
