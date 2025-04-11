@@ -26,6 +26,25 @@ with st.form("estimator_form"):
     city = st.selectbox("Select City", sorted(city_coords.keys()))
     lat = city_coords[city]['latitude']
     lon = city_coords[city]['longitude']
+    
+    layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=[{"lat": lat, "lon": lon}],
+    get_position='[lon, lat]',
+    get_color='[200, 30, 0, 160]',
+    get_radius=5000,
+    )
+    view_state = pdk.ViewState(
+        latitude=lat,
+        longitude=lon,
+        zoom=6,
+        pitch=0,
+    )
+    st.pydeck_chart(pdk.Deck(
+        map_style="mapbox://styles/mapbox/light-v9",
+        initial_view_state=view_state,
+        layers=[layer], 
+    ))
 
     st.markdown("### Basic Listing Information")
     col1, col2 = st.columns(2)
@@ -91,25 +110,6 @@ for col in feature_cols:
     if col not in X_input.columns:
         X_input[col] = 0
 X_input = X_input[feature_cols]
-
-layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=[{"lat": lat, "lon": lon}],
-    get_position='[lon, lat]',
-    get_color='[200, 30, 0, 160]',
-    get_radius=5000,
-)
-view_state = pdk.ViewState(
-    latitude=lat,
-    longitude=lon,
-    zoom=6,
-    pitch=0,
-)
-st.pydeck_chart(pdk.Deck(
-    map_style="mapbox://styles/mapbox/light-v9",
-    initial_view_state=view_state,
-    layers=[layer],
-))
 
 if submitted:
     predicted_price = model.predict(X_input)[0]
