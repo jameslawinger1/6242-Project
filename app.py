@@ -127,7 +127,7 @@ if st.button("Compare Prices Across Cities"):
     pred_df = pd.DataFrame(city_predictions, columns=["City", "Predicted Price"])
     pred_df["Predicted Price"] = pred_df["Predicted Price"].round(2)
 
-    selection = alt.selection_single(empty='none', fields=['City'])
+    selection = alt.selection_single(on="mouseover", empty='none', fields=['City'])
     chart = alt.Chart(pred_df).mark_bar().encode(
         x=alt.X("City:N", sort="-y"),
         y=alt.Y("Predicted Price:Q"),
@@ -152,14 +152,17 @@ if st.button("Show Feature Importance"):
             'Importance': feature_importances
         }).sort_values(by='Importance', ascending=False)
 
+        # Create a selection for hover action on the feature importance chart
+        selection_feat = alt.selection_single(on="mouseover", empty='none', fields=['Feature'])
         chart = alt.Chart(importance_df).mark_bar().encode(
             x=alt.X("Importance:Q", title="Relative Importance"),
             y=alt.Y("Feature:N", sort='-x'),
-            tooltip=[alt.Tooltip("Feature:N"), alt.Tooltip("Importance:Q", format=".4f")]
+            tooltip=[alt.Tooltip("Feature:N"), alt.Tooltip("Importance:Q", format=".4f")],
+            color=alt.condition(selection_feat, alt.value('#f53f2c'), alt.value('#aaa'))
         ).properties(
             width=600,
             height=600,
             title="Feature Importance"
-        ).interactive()
+        ).add_selection(selection_feat).interactive()
 
         st.altair_chart(chart, use_container_width=True)
