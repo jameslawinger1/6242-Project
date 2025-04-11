@@ -153,7 +153,7 @@ if st.button("Show Feature Importance"):
         }).sort_values(by='Importance', ascending=False)
 
         top_10_df = importance_df.head(10).copy()
-selection_feat = alt.selection_single(on="mouseover", empty='none', fields=['Feature'])
+        selection_feat = alt.selection_single(on="mouseover", empty='none', fields=['Feature'])
         
         chart = (
             alt.Chart(top_10_df)
