@@ -127,18 +127,21 @@ if st.button("Compare Prices Across Cities"):
     pred_df = pd.DataFrame(city_predictions, columns=["City", "Predicted Price"])
     pred_df["Predicted Price"] = pred_df["Predicted Price"].round(2)
 
-    chart = alt.Chart(pred_df).mark_bar(color='#f53f2c').encode(
+    selection = alt.selection_single(empty='none', fields=['City'])
+    chart = alt.Chart(pred_df).mark_bar().encode(
         x=alt.X("City:N", sort="-y"),
         y=alt.Y("Predicted Price:Q"),
         tooltip=[
             alt.Tooltip("City:N"),
             alt.Tooltip("Predicted Price:Q", format=".2f")
-        ]
+        ],
+        color=alt.condition(selection, alt.value('#f53f2c'), alt.value('#aaa'))
     ).properties(
         width=600,
         height=400,
         title="Predicted Prices with Selected Features Across Cities"
-    )
+    ).add_selection(selection).interactive()
+
     st.altair_chart(chart, use_container_width=True)
 
 if st.button("Show Feature Importance"):
@@ -149,7 +152,7 @@ if st.button("Show Feature Importance"):
             'Importance': feature_importances
         }).sort_values(by='Importance', ascending=False)
 
-        chart = alt.Chart(importance_df).mark_bar(color='#FF5733').encode(
+        chart = alt.Chart(importance_df).mark_bar().encode(
             x=alt.X("Importance:Q", title="Relative Importance"),
             y=alt.Y("Feature:N", sort='-x'),
             tooltip=[alt.Tooltip("Feature:N"), alt.Tooltip("Importance:Q", format=".4f")]
@@ -157,6 +160,6 @@ if st.button("Show Feature Importance"):
             width=600,
             height=600,
             title="Feature Importance"
-        )
+        ).interactive()
 
         st.altair_chart(chart, use_container_width=True)
