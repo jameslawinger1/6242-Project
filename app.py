@@ -5,6 +5,7 @@ import pickle
 import datetime
 import pydeck as pdk
 import matplotlib.pyplot as plt
+import altair as alt
 
 with(open('rf_model.pkl', 'rb')) as f: 
     model = pickle.load(f)
@@ -112,7 +113,7 @@ if st.button("Show Feature Importance"):
         importance_df = pd.DataFrame({'Feature': feature_cols, 'Importance': feature_importances})
         importance_df = importance_df.sort_values(by='Importance', ascending=True)
         fig, ax = plt.subplots(figsize=(8, 6))
-        ax.barh(importance_df['Feature'], importance_df['Importance'], color='red', align='center')
+        ax.barh(importance_df['Feature'], importance_df['Importance'], color='#f53f2c', align='center')
         ax.set_xlabel("Relative Importance")
         ax.set_title("Feature Importance")
         st.pyplot(fig)
@@ -141,4 +142,20 @@ if st.button("Compare Prices Across Cities"):
 
     st.subheader("Predicted Prices with Seelected Features Across Cities")
     pred_df = pd.DataFrame(city_predictions, columns=["City", "Predicted Price"])
-    st.bar_chart(pred_df.set_index("City"))
+
+    pred_df["Predicted Price"] = pred_df["Predicted Price"].round(2)
+
+    chart = alt.Chart(pred_df).mark_bar(color='#f53f2c').encode(
+        x=alt.X("City:N", sort="-y"),
+        y=alt.Y("Predicted Price:Q"),
+        tooltip=[
+            alt.Tooltip("City:N"),
+            alt.Tooltip("Predicted Price:Q", format=".2f")
+        ]
+    ).properties(
+        width=600,
+        height=400,
+        title="Predicted Prices with Selected Features Across Cities"
+    )
+
+    st.altair_chart(chart, use_container_width=True)
