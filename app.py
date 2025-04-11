@@ -21,10 +21,31 @@ with open('city_coords.pkl', 'rb') as f:
 
 st.title("Airbnb Price Estimator")
 
-with st.form("estimator_form"):
-    st.markdown("### Location")
-    city = st.selectbox("Select City", sorted(city_coords.keys()))
+st.markdown("### Location")
+city = st.selectbox("Select City", sorted(city_coords.keys()))
+lat = city_coords[city]['latitude']
+lon = city_coords[city]['longitude']
 
+st.pydeck_chart(pdk.Deck(
+    map_style="mapbox://styles/mapbox/light-v9",
+    initial_view_state=pdk.ViewState(
+        latitude=lat,
+        longitude=lon,
+        zoom=6,
+        pitch=0,
+    ),
+    layers=[
+        pdk.Layer(
+            "ScatterplotLayer",
+            data=[{"lat": lat, "lon": lon}],
+            get_position='[lon, lat]',
+            get_color='[200, 30, 0, 160]',
+            get_radius=5000,
+        )
+    ]
+), use_container_width=True)
+
+with st.form("estimator_form"):
     st.markdown("### Basic Listing Info")
     col1, col2 = st.columns(2)
     with col1:
@@ -63,27 +84,6 @@ with st.form("estimator_form"):
 
     submitted = st.form_submit_button("Estimate Price")
 
-lat = city_coords[city]['latitude']
-lon = city_coords[city]['longitude']
-
-layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=[{"lat": lat, "lon": lon}],
-    get_position='[lon, lat]',
-    get_color='[200, 30, 0, 160]',
-    get_radius=5000,
-)
-view_state = pdk.ViewState(
-    latitude=lat,
-    longitude=lon,
-    zoom=6,
-    pitch=0,
-)
-st.pydeck_chart(pdk.Deck(
-    map_style="mapbox://styles/mapbox/light-v9",
-    initial_view_state=view_state,
-    layers=[layer],
-), use_container_width=True)
 
 
 input_dict = {}
