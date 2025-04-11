@@ -43,7 +43,7 @@ with st.form("estimator_form"):
     st.pydeck_chart(pdk.Deck(
         map_style="mapbox://styles/mapbox/light-v9",
         initial_view_state=view_state,
-        layers=[layer], use_container_width=True
+        layers=[layer],
     ))
 
     st.markdown("### Basic Listing Information")
