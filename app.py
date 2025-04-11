@@ -152,17 +152,29 @@ if st.button("Show Feature Importance"):
             'Importance': feature_importances
         }).sort_values(by='Importance', ascending=False)
 
-        # Create a selection for hover action on the feature importance chart
-        selection_feat = alt.selection_single(on="mouseover", empty='none', fields=['Feature'])
-        chart = alt.Chart(importance_df).mark_bar().encode(
-            x=alt.X("Importance:Q", title="Relative Importance"),
-            y=alt.Y("Feature:N", sort='-x'),
-            tooltip=[alt.Tooltip("Feature:N"), alt.Tooltip("Importance:Q", format=".4f")],
-            color=alt.condition(selection_feat, alt.value('#f53f2c'), alt.value('#aaa'))
-        ).properties(
-            width=600,
-            height=600,
-            title="Feature Importance"
-        ).add_selection(selection_feat).interactive()
-
+        top_10_df = importance_df.head(10).copy()
+selection_feat = alt.selection_single(on="mouseover", empty='none', fields=['Feature'])
+        
+        chart = (
+            alt.Chart(top_10_df)
+            .mark_bar()
+            .encode(
+                x=alt.X("Importance:Q", title="Relative Importance"),
+                y=alt.Y(
+                    "Feature:N",
+                    sort=top_10_df["Feature"].tolist()[::-1],
+                    axis=alt.Axis(labelOverlap=False, labelLimit=300)  
+                ),
+                tooltip=[alt.Tooltip("Feature:N"), alt.Tooltip("Importance:Q", format=".4f")],
+                color=alt.condition(selection_feat, alt.value('#f53f2c'), alt.value('#aaa'))
+            )
+            .properties(
+                width=600,
+                height=alt.Step(30) * len(top_10_df),
+                title="Top 10 Feature Importance"
+            )
+            .add_selection(selection_feat)
+            .interactive()
+        )
+        
         st.altair_chart(chart, use_container_width=True)
