@@ -46,7 +46,7 @@ st.pydeck_chart(pdk.Deck(
 ), use_container_width=True)
 
 with st.form("estimator_form"):
-    st.markdown("### Basic Listing Info")
+    st.markdown("### Basic Listing Information")
     col1, col2 = st.columns(2)
     with col1:
         accommodates = st.slider("Accommodates", 1, 16, 4)
